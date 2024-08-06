@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 const PORT = 6942;
 
 const app = express();
@@ -10,5 +10,5 @@ app.get('/heartbeat', (_req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`API listening at http://localhost:${PORT}`);
+  console.log(`API listening at http://localhost:${PORT}`);
 });

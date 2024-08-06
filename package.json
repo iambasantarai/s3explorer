@@ -1,18 +1,20 @@
 {
-    "name": "s3explorer",
-    "version": "1.0.0",
-    "main": "index.js",
-    "author": "iambasantarai <iambasantarai@gmail.com>",
-    "private": true,
-    "license": "MIT",
-    "workspaces": [
-        "api",
-        "ui"
-    ],
-    "scripts": {
-        "start": "concurrently \"yarn workspace api start\" \"yarn workspace ui start\""
-    },
-    "devDependencies": {
-        "concurrently": "^8.2.2"
-    }
+  "name": "s3explorer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "iambasantarai <iambasantarai@gmail.com>",
+  "private": true,
+  "license": "MIT",
+  "workspaces": [
+    "api",
+    "ui"
+  ],
+  "scripts": {
+    "start": "concurrently \"yarn workspace api start\" \"yarn workspace ui start\"",
+    "prettier:format": "prettier --write \"./**/*.{js,ts,json}\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prettier": "^3.3.3"
+  }
 }
