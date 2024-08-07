@@ -1,7 +1,6 @@
 {
   "name": "s3explorer",
   "version": "1.0.0",
-  "main": "index.js",
   "author": "iambasantarai <iambasantarai@gmail.com>",
   "private": true,
   "license": "MIT",
@@ -10,11 +9,14 @@
     "ui"
   ],
   "scripts": {
+    "dev": "concurrently \"yarn workspace api dev\" \"yarn workspace ui dev\"",
+    "build": "concurrently \"yarn workspace api build\" \"yarn workspace ui build\"",
     "start": "concurrently \"yarn workspace api start\" \"yarn workspace ui start\"",
     "prettier:format": "prettier --write \"./**/*.{js,ts,json}\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   }
 }
