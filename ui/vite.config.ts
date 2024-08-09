@@ -1,5 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import dotenv from 'dotenv';
+
+const serverEnv = dotenv.config({ processEnv: {}, path: '../api/.env' }).parsed;
+const serverHost = serverEnv?.['HOST'] ?? 'localhost';
+const serverPort = parseInt(serverEnv?.['PORT']! ?? 3000);
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -7,7 +12,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:6942',
+        target: `http://${serverHost}:${serverPort}`,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }

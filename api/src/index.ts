@@ -3,7 +3,8 @@ import express, {
   type Request,
   type Response
 } from 'express';
-const PORT = 6942;
+
+const PORT = process.env.PORT ?? 3000;
 
 const app: Application = express();
 
