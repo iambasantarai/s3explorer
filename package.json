@@ -13,8 +13,8 @@
     "build": "concurrently \"yarn workspace api build\" \"yarn workspace ui build\"",
     "start": "concurrently \"yarn workspace api start\" \"yarn workspace ui preview\"",
     "clean": "concurrently \"yarn workspace api clean\" \"yarn workspace ui clean\"",
-    "check:format": "prettier --check \"./**/*.{js,jsx,ts,tsx,json}\"",
-    "fix:format": "prettier --write \"./**/*.{js,jsx,ts,tsx,json}\""
+    "format:check": "prettier --check \"./**/*.{js,jsx,ts,tsx,json}\"",
+    "format:fix": "prettier --write \"./**/*.{js,jsx,ts,tsx,json}\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
