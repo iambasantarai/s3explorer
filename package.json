@@ -12,8 +12,9 @@
     "dev": "concurrently \"yarn workspace api dev\" \"yarn workspace ui dev\"",
     "build": "concurrently \"yarn workspace api build\" \"yarn workspace ui build\"",
     "start": "concurrently \"yarn workspace api start\" \"yarn workspace ui start\"",
-    "check:format": "prettier --check \"./**/*.{js,ts,json}\"",
-    "fix:format": "prettier --write \"./**/*.{js,ts,json}\""
+    "clean": "concurrently \"yarn workspace api clean\" \"yarn workspace ui clean\"",
+    "check:format": "prettier --check \"./**/*.{js,jsx,ts,tsx,json}\"",
+    "fix:format": "prettier --write \"./**/*.{js,jsx,ts,tsx,json}\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
