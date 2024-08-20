@@ -10,10 +10,13 @@
     "ui"
   ],
   "scripts": {
-        "dev": "concurrently \"yarn workspace api dev\" \"yarn workspace ui dev\""
+    "dev": "concurrently \"yarn workspace api dev\" \"yarn workspace ui dev\"",
+    "format:check": "prettier --check \"./**/*.{js,jsx,ts,tsx,json,html,css}\"",
+    "format:fix": "prettier --write \"./**/*.{js,jsx,ts,tsx,json,html,css}\""
   },
   "dependencies": {},
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "prettier": "^3.3.3"
   }
 }

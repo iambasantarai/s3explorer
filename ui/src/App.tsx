@@ -1,22 +1,22 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
 
 function App() {
-  const [heartbeat, setHeartbeat] = useState(null)
+  const [heartbeat, setHeartbeat] = useState(null);
 
   useEffect(() => {
-      fetch('api/heartbeat')
+    fetch("api/heartbeat")
       .then((response) => response.json())
       .then((response) => {
-          console.log(response)
-          setHeartbeat(response.heartbeat)
+        console.log(response);
+        setHeartbeat(response.heartbeat);
       })
-      .catch((error) => console.log(error))
-  }, [])
+      .catch((error) => console.log(error));
+  }, []);
 
-    return (
+  return (
     <>
       <div>
         <a href="https://vitejs.dev" target="_blank">
@@ -33,7 +33,7 @@ function App() {
         </p>
       </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
