@@ -1,0 +1,7 @@
+{
+  "name": "s3explorer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "iambasantarai <iambasantarai@gmail.com>",
+  "license": "MIT"
+}
