@@ -1,7 +1,19 @@
 {
   "name": "s3explorer",
   "version": "1.0.0",
+  "private": "true",
   "main": "index.js",
   "author": "iambasantarai <iambasantarai@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "workspaces": [
+    "api",
+    "ui"
+  ],
+  "scripts": {
+        "dev": "concurrently \"yarn workspace api dev\" \"yarn workspace ui dev\""
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
 }
