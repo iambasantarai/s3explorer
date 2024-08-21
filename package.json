@@ -11,6 +11,9 @@
   ],
   "scripts": {
     "dev": "concurrently \"yarn workspace api dev\" \"yarn workspace ui dev\"",
+    "build": "concurrently \"yarn workspace api build\" \"yarn workspace ui build\"",
+    "start": "concurrently \"yarn workspace api start\" \"yarn workspace ui preview\"",
+    "clean": "concurrently \"yarn workspace api clean\" \"yarn workspace ui clean\"",
     "format:check": "prettier --check \"./**/*.{js,jsx,ts,tsx,json,html,css}\"",
     "format:fix": "prettier --write \"./**/*.{js,jsx,ts,tsx,json,html,css}\"",
     "docker:build": "docker build -t s3explorer .",
