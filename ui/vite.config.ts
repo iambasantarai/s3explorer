@@ -10,6 +10,17 @@ const uiPort = parseInt(apiENV?.["UI_PORT"] || "3000", 10);
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  preview: {
+    proxy: {
+      "/api": {
+        target: `http://${apiHost}:${apiPort}`,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
+    port: uiPort,
+    host: true,
+  },
   server: {
     proxy: {
       "/api": {
