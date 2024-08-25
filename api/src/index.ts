@@ -10,6 +10,9 @@ const PORT = parseInt(process.env.API_PORT || "8000", 10);
 
 const app: Express = express();
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Generate swaggr docs
 generateSwaggerDocs(app);
 app.get("/", (_req: Request, res: Response) => {
