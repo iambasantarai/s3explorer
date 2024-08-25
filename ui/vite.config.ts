@@ -15,7 +15,6 @@ export default defineConfig({
       "/api": {
         target: `http://${apiHost}:${apiPort}`,
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
     port: uiPort,
@@ -26,7 +25,6 @@ export default defineConfig({
       "/api": {
         target: `http://${apiHost}:${apiPort}`,
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
     port: uiPort,
