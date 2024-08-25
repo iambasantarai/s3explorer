@@ -20,7 +20,7 @@ export const generateSwaggerDocs = async (app: Application) => {
   app.use(
     "/api/docs/explorer",
     swaggerUI.serve,
-    swaggerUI.setup(openAPISpecification),
+    swaggerUI.setup(openAPISpecification, { explorer: true }),
   );
 
   app.get("/api/docs/openapi.json", (_req: Request, res: Response) => {
