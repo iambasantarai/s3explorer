@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import routes from "./routes";
 import { generateSwaggerDocs } from "./configs/swagger.config";
 import path from "path";
+import morgan from "morgan";
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const app: Express = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan("short"));
 
 // Generate swaggr docs
 generateSwaggerDocs(app);
