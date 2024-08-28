@@ -1,4 +1,5 @@
 import { Request, Response, Router } from "express";
+import fileExploferRoutes from "./fileExplorer.route";
 
 const router = Router();
 
@@ -24,5 +25,7 @@ router.get("/heartbeat", (_req: Request, res: Response) => {
   const hrtime = process.hrtime.bigint();
   res.status(200).json({ heartbeat: hrtime.toString() });
 });
+
+router.use("file-explorer", fileExploferRoutes);
 
 export default router;
