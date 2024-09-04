@@ -1,5 +1,8 @@
 import { Router } from "express";
 
+import directoryRoutes from "./directory.route";
+import fileRoutes from "./file.route";
+
 const router = Router();
 
 /**
@@ -60,12 +63,7 @@ const router = Router();
  */
 router.get("/list-all");
 
-// create-directory
-// delete-directory
-// update-directory
-// upload-file
-// update-file
-// delete-file
-// download-file
+router.use("/directories", directoryRoutes);
+router.use("/files", fileRoutes);
 
 export default router;
