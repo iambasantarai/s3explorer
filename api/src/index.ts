@@ -5,6 +5,7 @@ import path from "path";
 import morgan from "morgan";
 
 import { serverPort } from "./utils/env.util";
+import errorHandlerMiddleware from "./middlewares/errorHandler.middleware";
 
 const app: Express = express();
 
@@ -19,6 +20,8 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 app.use("/api", routes);
+
+app.use(errorHandlerMiddleware);
 
 app.listen(serverPort, () => {
   console.log(`[API]: Listening at http://localhost:${serverPort}`);
