@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from "express";
+import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
 import { CustomError } from "../errors/custom.error";
 import { StatusCodes } from "http-status-codes";
 
-const errorHandlerMiddleware = async (
+const errorHandlerMiddleware: ErrorRequestHandler = async (
   error: CustomError,
   req: Request,
   res: Response,

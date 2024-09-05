@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
 import routes from "./routes";
 import { generateSwaggerDocs } from "./configs/swagger.config";
 import path from "path";
@@ -6,6 +6,8 @@ import morgan from "morgan";
 
 import { serverPort } from "./utils/env.util";
 import errorHandlerMiddleware from "./middlewares/errorHandler.middleware";
+import { CustomError } from "./errors/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 const app: Express = express();
 
@@ -20,6 +22,13 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 app.use("/api", routes);
+
+app.all("*", (req: Request, res: Response, next: NextFunction) => {
+  throw new CustomError(
+    StatusCodes.NOT_FOUND,
+    `Can't find ${req.originalUrl} in the server!`,
+  );
+});
 
 app.use(errorHandlerMiddleware);
 
