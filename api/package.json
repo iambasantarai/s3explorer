@@ -11,6 +11,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "aws-sdk": "^2.1689.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "http-status-codes": "^2.3.0",
