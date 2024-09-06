@@ -7,6 +7,8 @@ const listAllObjects = async (
   next: NextFunction,
 ) => {
   try {
+    const { nextRootDirectory, continuationToken, maxKeys } = req.params;
+
     const apiResponse = await explorerService.listAllObjects();
 
     return res.json(apiResponse);

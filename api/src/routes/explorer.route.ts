@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import directoryRoutes from "./directory.route";
 import fileRoutes from "./file.route";
+import explorerController from "../controllers/explorer.controller";
 
 const router = Router();
 
@@ -61,7 +62,7 @@ const router = Router();
  *                isTruncated:
  *                  type: boolean
  */
-router.get("/list-all");
+router.get("/list-all", explorerController.listAllObjects);
 
 router.use("/directories", directoryRoutes);
 router.use("/files", fileRoutes);
