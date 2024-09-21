@@ -13,6 +13,7 @@ const router = Router();
  *    tags:
  *      - File Explorer
  *    description: Request for file explorer to list all objects.
+ *    summary: List all directory/file objects
  *
  *    parameters:
  *      - name: nextRootDirectory
