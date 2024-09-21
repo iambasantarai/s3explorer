@@ -22,6 +22,27 @@ const createDirectory = async (
   }
 };
 
+const deleteDirectory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { currentPath, directoryName } = req.body;
+
+    const apiResponse = await directoryService.remove({
+      currentPath,
+      directoryName,
+    });
+
+    return res.status(StatusCodes.OK).json(apiResponse);
+  } catch (error) {
+    console.log("ERROR: ", error);
+    next(error);
+  }
+};
+
 export default {
   createDirectory,
+  deleteDirectory,
 };

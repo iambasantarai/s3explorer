@@ -3,6 +3,7 @@ import { CustomError } from "../errors/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../utils/error.util";
 import { s3Credentials } from "../utils/env.util";
+import { isValidDirectoryName } from "../helper/validation.helper";
 
 const createS3Client = (): S3 => {
   return new S3({
@@ -12,7 +13,7 @@ const createS3Client = (): S3 => {
   });
 };
 
-const checkIfExists = async (key: string) => {
+const checkIfExists = async (key: string): Promise<boolean> => {
   try {
     const s3 = createS3Client();
     const params: S3.HeadObjectRequest = {
@@ -35,6 +36,32 @@ const checkIfExists = async (key: string) => {
   }
 };
 
+const listFromCurrentPath = async (
+  directoryPath: string,
+): Promise<S3.Object[]> => {
+  const s3 = createS3Client();
+  const bucketName = s3Credentials.bucket;
+
+  const objects: S3.Object[] = [];
+  let continuationToken: string | undefined = undefined;
+
+  do {
+    const data: any = await s3
+      .listObjectsV2({
+        Bucket: bucketName as string,
+        Prefix: directoryPath,
+        ContinuationToken: continuationToken,
+      })
+      .promise();
+
+    objects.push(...(data.Contents || []));
+
+    continuationToken = data.NextContinuationToken;
+  } while (continuationToken);
+
+  return objects;
+};
+
 const create = async (params: {
   currentPath: string;
   directoryName: string;
@@ -42,14 +69,20 @@ const create = async (params: {
   try {
     const { currentPath, directoryName } = params;
 
+    if (!isValidDirectoryName(directoryName)) {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        "Directory name can only contain letters, numbers, underscore(_) and hyphens(-).",
+      );
+    }
+
     const s3 = createS3Client();
     const bucketName = s3Credentials.bucket;
     const basePrefix = s3Credentials.basePrefix;
 
-    const destinationKey = `${basePrefix ? basePrefix + "/" : ""}${
+    const directoryKey = `${basePrefix ? basePrefix + "/" : ""}${
       currentPath !== "/" ? currentPath + "/" : ""
-    }`;
-    const directoryKey = `${destinationKey}${directoryName}/`;
+    }${directoryName}/`;
 
     // TODO: Should check for existance of destniation
 
@@ -73,7 +106,62 @@ const create = async (params: {
     await s3.putObject(bucketParams).promise();
 
     return {
-      message: `Directory ${directoryName} created successfully.`,
+      message: `Directory ${directoryName} has been created successfully.`,
+    };
+  } catch (error) {
+    console.log("ERROR: ", error);
+
+    throw new CustomError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      getErrorMessage(error),
+    );
+  }
+};
+
+const remove = async (params: {
+  currentPath: string;
+  directoryName: string;
+}) => {
+  try {
+    const { currentPath, directoryName } = params;
+
+    if (!isValidDirectoryName(directoryName)) {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        "Directory name can only contain letters, numbers, underscore(_) and hyphens(-).",
+      );
+    }
+
+    const s3 = createS3Client();
+    const bucketName = s3Credentials.bucket;
+    const basePrefix = s3Credentials.basePrefix;
+
+    const directoryPath = `${basePrefix}/${
+      currentPath !== "/" ? currentPath + "/" : ""
+    }${directoryName}/`;
+
+    const objects = await listFromCurrentPath(directoryPath);
+
+    // Delete each object (file or directory) individually
+    for (const object of objects) {
+      await s3
+        .deleteObject({
+          Bucket: bucketName as string,
+          Key: object.Key!,
+        })
+        .promise();
+    }
+
+    // Delete the directory itself
+    await s3
+      .deleteObject({
+        Bucket: bucketName as string,
+        Key: directoryPath,
+      })
+      .promise();
+
+    return {
+      message: `${directoryName} directory has been deleted successfully.`,
     };
   } catch (error) {
     console.log("ERROR: ", error);
@@ -87,4 +175,5 @@ const create = async (params: {
 
 export default {
   create,
+  remove,
 };

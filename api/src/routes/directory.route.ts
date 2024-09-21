@@ -35,7 +35,7 @@ const router = Router();
  *              properties:
  *                message:
  *                  type: string
- *                  example: "Directory created successfully."
+ *                  example: "Directory has been created successfully."
  *      400:
  *        description: Bad request, invalid input
  */
@@ -59,10 +59,36 @@ router.put("/");
  *  delete:
  *    tags:
  *      - Directory management
- *    description: Request for deleting directory in s3 bucket.
+ *    description: Request for deleting a directory from s3 bucket.
+ *    summary: Delete a directory from the S3 bucket.
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              currentPath:
+ *                type: string
+ *              directoryName:
+ *                type: string
+ *            required:
+ *              - currentPath
+ *              - directoryName
  *    responses:
  *      200:
+ *        description: Directory deleted successfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  example: "Directory has been deleted successfully."
+ *      400:
+ *        description: Bad request, invalid input
  */
-router.delete("/");
+router.delete("/", directoryController.deleteDirectory);
 
 export default router;
