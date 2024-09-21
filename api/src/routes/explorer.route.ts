@@ -8,7 +8,7 @@ const router = Router();
 
 /**
  * @openapi
- * '/api/file-explorer/list-all':
+ * '/api/explorer/list-all':
  *  get:
  *    tags:
  *      - File Explorer
@@ -62,7 +62,7 @@ const router = Router();
  *                isTruncated:
  *                  type: boolean
  */
-router.get("/list-all", explorerController.listAllObjects);
+router.get("/list-all", explorerController.listAll);
 
 router.use("/directories", directoryRoutes);
 router.use("/files", fileRoutes);

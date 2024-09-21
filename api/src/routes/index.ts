@@ -26,6 +26,6 @@ router.get("/heartbeat", (_req: Request, res: Response) => {
   res.status(200).json({ heartbeat: hrtime.toString() });
 });
 
-router.use("explorer", explolerRoutes);
+router.use("/explorer", explolerRoutes);
 
 export default router;

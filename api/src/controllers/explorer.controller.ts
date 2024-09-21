@@ -1,17 +1,20 @@
 import { Request, Response, NextFunction } from "express";
 import explorerService from "../services/explorer.service";
+import { StatusCodes } from "http-status-codes";
 
-const listAllObjects = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const listAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { nextRootDirectory, continuationToken, maxKeys } = req.params;
+    const nextRootDirectory = req.query.nextRootDirectory as string;
+    const continuationToken = req.query.continuationToken as string | undefined;
+    const maxKeys = req.query.maxKeys as string | undefined;
 
-    const apiResponse = await explorerService.listAllObjects();
+    const apiResponse = await explorerService.listAllObjects({
+      nextRootDirectory,
+      continuationToken,
+      maxKeys,
+    });
 
-    return res.json(apiResponse);
+    return res.status(StatusCodes.OK).json(apiResponse);
   } catch (error) {
     console.log("ERROR: ", error);
     next(error);
@@ -19,5 +22,5 @@ const listAllObjects = async (
 };
 
 export default {
-  listAllObjects,
+  listAll,
 };
