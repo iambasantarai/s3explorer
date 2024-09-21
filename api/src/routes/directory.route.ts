@@ -18,12 +18,12 @@ const router = Router();
  *          schema:
  *            type: object
  *            properties:
- *              destination:
+ *              currentPath:
  *                type: string
  *              directoryName:
  *                type: string
  *            required:
- *              - destination
+ *              - currentPath
  *              - directoryName
  *    responses:
  *      201:

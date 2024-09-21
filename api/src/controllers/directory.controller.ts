@@ -8,10 +8,10 @@ const createDirectory = async (
   next: NextFunction,
 ) => {
   try {
-    const { destination, directoryName } = req.body;
+    const { currentPath, directoryName } = req.body;
 
     const apiResponse = await directoryService.create({
-      destination,
+      currentPath,
       directoryName,
     });
 

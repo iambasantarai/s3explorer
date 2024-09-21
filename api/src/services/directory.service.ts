@@ -36,18 +36,18 @@ const checkIfExists = async (key: string) => {
 };
 
 const create = async (params: {
-  destination: string;
+  currentPath: string;
   directoryName: string;
 }) => {
   try {
-    const { destination, directoryName } = params;
+    const { currentPath, directoryName } = params;
 
     const s3 = createS3Client();
     const bucketName = s3Credentials.bucket;
     const basePrefix = s3Credentials.basePrefix;
 
     const destinationKey = `${basePrefix ? basePrefix + "/" : ""}${
-      destination !== "/" ? destination + "/" : ""
+      currentPath !== "/" ? currentPath + "/" : ""
     }`;
     const directoryKey = `${destinationKey}${directoryName}/`;
 
