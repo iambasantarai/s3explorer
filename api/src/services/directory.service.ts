@@ -140,6 +140,14 @@ const remove = async (params: {
       currentPath !== "/" ? currentPath + "/" : ""
     }${directoryName}/`;
 
+    const directoryExists = await checkIfExists(directoryPath);
+    if (!directoryExists) {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        `Directory named ${directoryName} doesn't exists.`,
+      );
+    }
+
     const objects = await listFromCurrentPath(directoryPath);
 
     // Delete each object (file or directory) individually
