@@ -1,4 +1,4 @@
-import S3, { PutObjectRequest } from "aws-sdk/clients/s3";
+import S3, { HeadObjectRequest, PutObjectRequest } from "aws-sdk/clients/s3";
 import { CustomError } from "../errors/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../utils/error.util";
@@ -16,7 +16,7 @@ const createS3Client = (): S3 => {
 const checkIfExists = async (key: string): Promise<boolean> => {
   try {
     const s3 = createS3Client();
-    const params: S3.HeadObjectRequest = {
+    const params: HeadObjectRequest = {
       Bucket: s3Credentials.bucket as string,
       Key: key,
     };
