@@ -1,7 +1,6 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { Button } from "@/components/common/button";
+import { Input } from "@/components/common/input";
 import {
   Table,
   TableBody,
@@ -9,19 +8,54 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/common/table";
 import {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
   RefreshCw,
   FolderIcon,
+  FolderPlusIcon,
+  FileUpIcon,
   FileIcon,
-  MoreHorizontal,
   ChevronDown,
+  TrashIcon,
+  FileDownIcon,
+  EditIcon,
 } from "lucide-react";
 
-export function FileExplorer() {
+export default function FileExplorer() {
+  const [contextMenu, setContextMenu] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+  });
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+
+  const handleContextMenu = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+    setContextMenu({ visible: true, x: event.clientX, y: event.clientY });
+  }, []);
+
+  const handleClickOutside = useCallback(
+    (event: MouseEvent) => {
+      if (
+        contextMenuRef.current &&
+        !contextMenuRef.current.contains(event.target as Node)
+      ) {
+        setContextMenu({ ...contextMenu, visible: false });
+      }
+    },
+    [contextMenu],
+  );
+
+  useEffect(() => {
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [handleClickOutside]);
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Left Sidebar */}
@@ -115,7 +149,10 @@ export function FileExplorer() {
         </div>
 
         {/* File list */}
-        <div className="flex-1 overflow-auto p-4">
+        <div
+          className="flex-1 overflow-auto p-4"
+          onContextMenu={handleContextMenu}
+        >
           <Table>
             <TableHeader>
               <TableRow>
@@ -193,6 +230,68 @@ export function FileExplorer() {
           </Table>
         </div>
       </div>
+
+      {/* Context Menu */}
+      {contextMenu.visible && (
+        <div
+          ref={contextMenuRef}
+          className="fixed bg-white shadow-md rounded-md p-2 z-50"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+        >
+          <ul className="space-y-1">
+            <li>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+              >
+                <FolderPlusIcon className="h-4 w-4 mr-2" />
+                Add directory
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+              >
+                <FileUpIcon className="h-4 w-4 mr-2" />
+                Upload file
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+              >
+                <FileDownIcon className="h-4 w-4 mr-2" />
+                Download File
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+              >
+                <EditIcon className="h-4 w-4 mr-2" />
+                Rename
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+              >
+                <TrashIcon className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
