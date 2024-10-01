@@ -1,7 +1,4 @@
 import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
 
 function App() {
   const [heartbeat, setHeartbeat] = useState(null);
@@ -18,19 +15,13 @@ function App() {
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>s3explorer</h1>
-      <div className="card">
-        <p>
-          Server heartbeat: <code>{heartbeat}</code>
-        </p>
+      <div className="background mx-auto max-w-sm">
+        <h1 className="font-semibold text-lg">s3explorer</h1>
+        <div className="card">
+          <p className="text-xs uppercase">
+            Server heartbeat: <code className="text-xs">{heartbeat}</code>
+          </p>
+        </div>
       </div>
     </>
   );
