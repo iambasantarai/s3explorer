@@ -102,7 +102,7 @@ const create = async (params: {
       ContentLength: 0,
     };
 
-    // it might create a file with no name and of size 0
+    // It might create a file with no name and of size 0
     await s3.putObject(bucketParams).promise();
 
     return {
@@ -181,7 +181,98 @@ const remove = async (params: {
   }
 };
 
+const update = async (params: {
+  currentPath: string;
+  oldDirectoryName: string;
+  newDirectoryName: string;
+}) => {
+  try {
+    const { currentPath, oldDirectoryName, newDirectoryName } = params;
+
+    if (!isValidDirectoryName(oldDirectoryName)) {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        "Directory name can only contain letters, numbers, underscores (_), and hyphens (-).",
+      );
+    }
+
+    if (!isValidDirectoryName(newDirectoryName)) {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        "Directory name can only contain letters, numbers, underscores (_), and hyphens (-).",
+      );
+    }
+
+    const s3 = createS3Client();
+    const bucketName = s3Credentials.bucket;
+    const basePrefix = s3Credentials.basePrefix;
+
+    // TODO: More clarity needed
+    const oldDirectoryPath = `${basePrefix}/${
+      currentPath !== "/" ? currentPath + "/" : ""
+    }${oldDirectoryName}/`;
+
+    const newDirectoryPath = `${basePrefix}/${
+      currentPath !== "/" ? currentPath + "/" : ""
+    }${newDirectoryName}/`;
+
+    const oldDirectoryExists = await checkIfExists(oldDirectoryPath);
+    if (!oldDirectoryExists) {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        `Directory named ${oldDirectoryName} doesn't exist.`,
+      );
+    }
+
+    const newDirectoryExists = await checkIfExists(newDirectoryPath);
+    if (newDirectoryExists) {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        `Directory named ${newDirectoryName} already exists.`,
+      );
+    }
+
+    // Move files from old directory to new directory
+    const oldDirectoryContents = await listFromCurrentPath(oldDirectoryPath);
+    await Promise.all(
+      oldDirectoryContents.map(async (object: any) => {
+        const copyParams = {
+          Bucket: bucketName as string,
+          CopySource: encodeURIComponent(`${bucketName}/${object.Key}`),
+          Key: object.Key!.replace(oldDirectoryPath, newDirectoryPath),
+        };
+
+        await s3.copyObject(copyParams).promise();
+      }),
+    );
+
+    // Delete old directory objects
+    await Promise.all(
+      oldDirectoryContents.map(async (object: any) => {
+        await s3
+          .deleteObject({
+            Bucket: bucketName as string,
+            Key: object.Key!,
+          })
+          .promise();
+      }),
+    );
+
+    return {
+      message: `${oldDirectoryName} has been updated to ${newDirectoryName} successfully.`,
+    };
+  } catch (error) {
+    console.log("ERROR: ", error);
+
+    throw new CustomError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      getErrorMessage(error),
+    );
+  }
+};
+
 export default {
   create,
   remove,
+  update,
 };

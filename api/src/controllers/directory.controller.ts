@@ -42,7 +42,29 @@ const deleteDirectory = async (
   }
 };
 
+const updateDirectory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { currentPath, oldDirectoryName, newDirectoryName } = req.body;
+
+    const apiResponse = await directoryService.update({
+      currentPath,
+      oldDirectoryName,
+      newDirectoryName,
+    });
+
+    return res.status(StatusCodes.OK).json(apiResponse);
+  } catch (error) {
+    console.log("ERROR: ", error);
+    next(error);
+  }
+};
+
 export default {
   createDirectory,
   deleteDirectory,
+  updateDirectory,
 };

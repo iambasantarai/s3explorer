@@ -47,11 +47,40 @@ router.post("/", directoryController.createDirectory);
  *  put:
  *    tags:
  *      - Directory management
- *    description: Request for updating directory in s3 bucket.
+ *    description: Request for updating a directory in s3 bucket.
+ *    summary: Update a directory in the S3 bucket.
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              currentPath:
+ *                type: string
+ *              oldDirectoryName:
+ *                type: string
+ *              newDirectoryName:
+ *                type: string
+ *            required:
+ *              - currentPath
+ *              - oldDirectoryName
+ *              - newDirectoryName
  *    responses:
  *      200:
+ *        description: Directory updated successfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  example: "Directory has been updated successfully."
+ *      400:
+ *        description: Bad request, invalid input
  */
-router.put("/");
+router.put("/", directoryController.updateDirectory);
 
 /**
  * @openapi
