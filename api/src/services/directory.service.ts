@@ -2,14 +2,14 @@ import S3, { HeadObjectRequest, PutObjectRequest } from "aws-sdk/clients/s3";
 import { CustomError } from "../errors/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../utils/error.util";
-import { s3Credentials } from "../utils/env.util";
+import { awsCredentials } from "../utils/env.util";
 import { isValidDirectoryName } from "../helper/validation.helper";
 
 const createS3Client = (): S3 => {
   return new S3({
-    accessKeyId: s3Credentials.accessKeyId,
-    secretAccessKey: s3Credentials.secretAccessKey,
-    region: s3Credentials.region,
+    accessKeyId: awsCredentials.accessKeyId,
+    secretAccessKey: awsCredentials.secretAccessKey,
+    region: awsCredentials.region,
   });
 };
 
@@ -17,7 +17,7 @@ const checkIfExists = async (key: string): Promise<boolean> => {
   try {
     const s3 = createS3Client();
     const params: HeadObjectRequest = {
-      Bucket: s3Credentials.bucket as string,
+      Bucket: awsCredentials.s3BucketName as string,
       Key: key,
     };
 
@@ -40,7 +40,7 @@ const listFromCurrentPath = async (
   directoryPath: string,
 ): Promise<S3.Object[]> => {
   const s3 = createS3Client();
-  const bucketName = s3Credentials.bucket;
+  const bucketName = awsCredentials.s3BucketName;
 
   const objects: S3.Object[] = [];
   let continuationToken: string | undefined = undefined;
@@ -77,8 +77,8 @@ const create = async (params: {
     }
 
     const s3 = createS3Client();
-    const bucketName = s3Credentials.bucket;
-    const basePrefix = s3Credentials.basePrefix;
+    const bucketName = awsCredentials.s3BucketName;
+    const basePrefix = awsCredentials.basePrefix;
 
     const directoryKey = `${basePrefix ? basePrefix + "/" : ""}${
       currentPath !== "/" ? currentPath + "/" : ""
@@ -133,8 +133,8 @@ const remove = async (params: {
     }
 
     const s3 = createS3Client();
-    const bucketName = s3Credentials.bucket;
-    const basePrefix = s3Credentials.basePrefix;
+    const bucketName = awsCredentials.s3BucketName;
+    const basePrefix = awsCredentials.basePrefix;
 
     const directoryPath = `${basePrefix}/${
       currentPath !== "/" ? currentPath + "/" : ""
@@ -204,8 +204,8 @@ const update = async (params: {
     }
 
     const s3 = createS3Client();
-    const bucketName = s3Credentials.bucket;
-    const basePrefix = s3Credentials.basePrefix;
+    const bucketName = awsCredentials.s3BucketName;
+    const basePrefix = awsCredentials.basePrefix;
 
     // TODO: More clarity needed
     const oldDirectoryPath = `${basePrefix}/${
