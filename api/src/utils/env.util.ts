@@ -10,3 +10,8 @@ export const awsCredentials = {
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   basePrefix: process.env.AWS_S3_BASE_PREFIX,
 };
+
+export const fileUploadConfig = {
+  uploadDirectory: process.env.UPLOAD_DIR,
+  maxFileSize: parseInt(process.env.MAX_FILE_SIXE as string, 10),
+};

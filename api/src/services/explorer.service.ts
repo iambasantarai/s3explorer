@@ -2,7 +2,7 @@ import S3 from "aws-sdk/clients/s3";
 import { CustomError } from "../errors/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../utils/error.util";
-import { s3Credentials } from "../utils/env.util";
+import { awsCredentials } from "../utils/env.util";
 import { getMimeType } from "../utils/mimeType.util";
 
 const listAllObjects = async (params: {
@@ -14,18 +14,18 @@ const listAllObjects = async (params: {
     const { nextRootDirectory, continuationToken, maxKeys } = params;
 
     const s3 = new S3({
-      accessKeyId: s3Credentials.accessKeyId,
-      secretAccessKey: s3Credentials.secretAccessKey,
-      region: s3Credentials.region,
+      accessKeyId: awsCredentials.accessKeyId,
+      secretAccessKey: awsCredentials.secretAccessKey,
+      region: awsCredentials.region,
     });
 
     let basePrefix: string = "";
-    if (s3Credentials.basePrefix !== "/") {
-      basePrefix = s3Credentials.basePrefix!;
+    if (awsCredentials.basePrefix !== "/") {
+      basePrefix = awsCredentials.basePrefix!;
     }
 
     const bucketParams: S3.ListObjectsV2Request = {
-      Bucket: s3Credentials.bucket!,
+      Bucket: awsCredentials.s3BucketName as string,
       Delimiter: "/",
       MaxKeys: maxKeys ? parseInt(maxKeys, 10) : 1000,
       ContinuationToken: continuationToken,

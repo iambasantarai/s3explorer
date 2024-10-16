@@ -1,4 +1,6 @@
 import { Router } from "express";
+import fileController from "../controllers/file.controller";
+import uploadFile from "../middlewares/fileUpload.middleware";
 
 const router = Router();
 
@@ -21,10 +23,53 @@ router.get("/");
  *    tags:
  *      - File management
  *    description: Request for uploading file in s3 bucket.
+ *    requestBody:
+ *      description: The file to be uploaded.
+ *      required: true
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              destinationDirectory:
+ *                type: string
+ *              file:
+ *                type: string
+ *                format: binary
+ *                description: The source file to be uploaded (PDF, Word, image, etc.)
  *    responses:
  *      200:
+ *        description: Success message.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  example: File uploaded successfully.
+ *      400:
+ *        description: Invalid file upload request
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  example: No file uploaded or invalid file type.
+ *      500:
+ *        description: Internal server error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  example: An error occurred during file upload.
  */
-router.post("/");
+router.post("/", uploadFile().single("file"), fileController.uploadFile);
 
 /**
  * @openapi
