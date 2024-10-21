@@ -165,7 +165,46 @@ const update = async (
   }
 };
 
+const remove = async (filePaths: string[]) => {
+  try {
+    const s3 = createS3Client();
+
+    const deletePromises = filePaths.map(async (filePath) => {
+      const deleteParams = {
+        Bucket: awsCredentials.s3BucketName as string,
+        Key: `${awsCredentials.basePrefix}/${filePath}`,
+      };
+
+      try {
+        await s3.deleteObject(deleteParams).promise();
+        return { filePath, status: "deleted" };
+      } catch (error) {
+        console.error(`Failed to delete ${filePath}:`, error);
+        return { filePath, status: "failed", error: getErrorMessage(error) };
+      }
+    });
+
+    const results = await Promise.all(deletePromises);
+
+    const deletedFiles = results.filter(
+      (result) => result.status === "deleted",
+    ).length;
+
+    return {
+      message: `${deletedFiles} file(s) have been deleted.`,
+      results,
+    };
+  } catch (error) {
+    console.error("ERROR:", error);
+    throw new CustomError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      getErrorMessage(error),
+    );
+  }
+};
+
 export default {
   upload,
   update,
+  remove,
 };

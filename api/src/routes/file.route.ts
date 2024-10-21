@@ -141,10 +141,53 @@ router.put("/", fileController.updateFile);
  *  delete:
  *    tags:
  *      - File management
- *    description: Request for deleting file in s3 bucket.
+ *    description: Delete files from S3 bucket.
+ *    requestBody:
+ *      description: The file paths to delete.
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              filePaths:
+ *                type: array
+ *                items:
+ *                  type: string
+ *            required:
+ *              - filePaths
  *    responses:
  *      200:
+ *        description: Success message.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  example: Files have been deleted successfully.
+ *      400:
+ *        description: Invalid delete request
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  example: No file paths provided.
+ *      500:
+ *        description: Internal server error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  example: An error occurred during file deletion.
  */
-router.delete("/");
+router.delete("/", fileController.deleteFile);
 
 export default router;
