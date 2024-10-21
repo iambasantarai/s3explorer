@@ -48,6 +48,24 @@ const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const updateFile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { destinationDirectory, oldFileName, newFileName } = req.body;
+
+    const apiResponse = await fileService.update(
+      destinationDirectory,
+      oldFileName,
+      newFileName,
+    );
+
+    return res.status(StatusCodes.OK).json(apiResponse);
+  } catch (error) {
+    console.error("ERROR:", error);
+    next(error);
+  }
+};
+
 export default {
   uploadFile,
+  updateFile,
 };

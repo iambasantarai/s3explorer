@@ -55,6 +55,92 @@ const upload = async (
   }
 };
 
+const update = async (
+  destinationDirectory: string,
+  oldFileName: string,
+  newFileName: string,
+) => {
+  try {
+    const s3 = createS3Client();
+
+    const oldKey = `${awsCredentials.basePrefix}${
+      destinationDirectory !== "/" ? `/${destinationDirectory}` : ""
+    }/${oldFileName}`;
+
+    const newKey = `${awsCredentials.basePrefix}${
+      destinationDirectory !== "/" ? `/${destinationDirectory}` : ""
+    }/${newFileName}`;
+
+    // Check if the old file exists
+    await s3
+      .headObject({
+        Bucket: awsCredentials.s3BucketName as string,
+        Key: oldKey,
+      })
+      .promise();
+
+    // Ensure the new file name doesn't already exist
+    try {
+      await s3
+        .headObject({
+          Bucket: awsCredentials.s3BucketName as string,
+          Key: newKey,
+        })
+        .promise();
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        `A file with the name ${newFileName} already exists in ${destinationDirectory}.`,
+      );
+    } catch (
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      error: any
+    ) {
+      if (error.code !== "NotFound") {
+        throw error;
+      }
+    }
+
+    // Rename the file by copying and deleting the old one
+    await s3
+      .copyObject({
+        Bucket: awsCredentials.s3BucketName as string,
+        CopySource: `/${awsCredentials.s3BucketName}/${oldKey}`,
+        Key: newKey,
+      })
+      .promise();
+
+    // After successful copy, delete the old file
+    await s3
+      .deleteObject({
+        Bucket: awsCredentials.s3BucketName as string,
+        Key: oldKey,
+      })
+      .promise();
+
+    return {
+      message: `${oldFileName} has been renamed to ${newFileName} successfully.`,
+    };
+  } catch (
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    error: any
+  ) {
+    console.error("ERROR:", error);
+
+    if (error.code === "NotFound") {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        `The file ${oldFileName} was not found in ${destinationDirectory}.`,
+      );
+    }
+
+    throw new CustomError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      getErrorMessage(error),
+    );
+  }
+};
+
 export default {
   upload,
+  update,
 };
