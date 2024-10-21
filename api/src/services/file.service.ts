@@ -6,11 +6,6 @@ import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../utils/error.util";
 import fileOperationHelper from "../helper/fileOperation.helper";
 
-type TFileInfo = {
-  originalName: string;
-  mimeType: string;
-};
-
 const createS3Client = (): S3 => {
   return new S3({
     accessKeyId: awsCredentials.accessKeyId,
@@ -21,32 +16,62 @@ const createS3Client = (): S3 => {
 
 const upload = async (
   destinationDirectory: string,
-  filePath: string,
-  fileInfo: TFileInfo,
+  files: Express.Multer.File[],
 ) => {
   try {
     const s3 = createS3Client();
 
-    const fileStream = createReadStream(filePath);
+    const uploadResults = await Promise.all(
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      files.map(async (file: any) => {
+        const fileKey = `${awsCredentials.basePrefix}${
+          destinationDirectory !== "/" ? `/${destinationDirectory}` : ""
+        }/${file.originalname}`;
 
-    const fileKey = `${awsCredentials.basePrefix}${
-      destinationDirectory !== "/" ? `/${destinationDirectory}` : ""
-    }/${fileInfo.originalName}`;
+        // Check if the file already exists
+        try {
+          await s3
+            .headObject({
+              Bucket: awsCredentials.s3BucketName as string,
+              Key: fileKey,
+            })
+            .promise();
+          throw new CustomError(
+            StatusCodes.BAD_REQUEST,
+            `A file with the name ${file.originalname} already exists in ${destinationDirectory}.`,
+          );
+        } catch (
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+          error: any
+        ) {
+          if (error.code !== "NotFound") {
+            throw error;
+          }
+        }
 
-    const uploadParams = {
-      Bucket: awsCredentials.s3BucketName as string,
-      ContentType: fileInfo.mimeType,
-      Key: fileKey,
-      Body: fileStream,
-    };
+        const fileStream = createReadStream(file.path);
+        const uploadParams = {
+          Bucket: awsCredentials.s3BucketName as string,
+          ContentType: file.mimetype,
+          Key: fileKey,
+          Body: fileStream,
+        };
 
-    const data = await s3.upload(uploadParams).promise();
+        const data = await s3.upload(uploadParams).promise();
 
-    await fileOperationHelper.removeFile(filePath);
+        // Remove the local file after successful upload
+        await fileOperationHelper.removeFile(file.path);
 
-    return data;
+        return {
+          message: `${file.originalname} has been uploaded successfully.`,
+          fileUrl: data.Location,
+        };
+      }),
+    );
+
+    return uploadResults;
   } catch (error) {
-    console.log("ERROR: ", error);
+    console.error("ERROR:", error);
 
     throw new CustomError(
       StatusCodes.INTERNAL_SERVER_ERROR,
