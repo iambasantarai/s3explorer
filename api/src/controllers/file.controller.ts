@@ -5,29 +5,45 @@ import { StatusCodes } from "http-status-codes";
 
 const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { file } = req;
+    const { files } = req;
     const { destinationDirectory } = req.body;
 
-    if (!file)
+    if (!Array.isArray(files) || files.length === 0) {
       throw new CustomError(StatusCodes.BAD_REQUEST, "No file provided.");
+    }
 
-    const fileInfo = {
-      originalName: file.originalname,
-      mimeType: file.mimetype,
-    };
+    const uploadResults = await Promise.all(
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      files.map(async (file: any) => {
+        const fileInfo = {
+          originalName: file.originalname,
+          mimeType: file.mimetype,
+        };
 
-    const uploadResult = await fileService.upload(
-      destinationDirectory,
-      file.path,
-      fileInfo,
+        try {
+          await fileService.upload(destinationDirectory, file.path, fileInfo);
+
+          return { file: file.originalname, status: "success" };
+        } catch (
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+          error: any
+        ) {
+          console.error(`Failed to upload ${file.originalname}:`, error);
+          return {
+            file: file.originalname,
+            status: "failure",
+            error: error.message,
+          };
+        }
+      }),
     );
 
     return res.status(StatusCodes.OK).json({
-      message: "File has been uploaded.",
-      data: uploadResult.Location,
+      message: "File upload process completed.",
+      results: uploadResults,
     });
   } catch (error) {
-    console.log("ERROR: ", error);
+    console.error("ERROR:", error);
     next(error);
   }
 };

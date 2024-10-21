@@ -29,7 +29,7 @@ const upload = async (
 
     const fileStream = createReadStream(filePath);
 
-    let fileKey = `${awsCredentials.basePrefix}${
+    const fileKey = `${awsCredentials.basePrefix}${
       destinationDirectory !== "/" ? `/${destinationDirectory}` : ""
     }/${fileInfo.originalName}`;
 

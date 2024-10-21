@@ -22,9 +22,9 @@ router.get("/");
  *  post:
  *    tags:
  *      - File management
- *    description: Request for uploading file in s3 bucket.
+ *    description: Request for uploading files in s3 bucket.
  *    requestBody:
- *      description: The file to be uploaded.
+ *      description: The files to be uploaded.
  *      required: true
  *      content:
  *        multipart/form-data:
@@ -33,10 +33,12 @@ router.get("/");
  *            properties:
  *              destinationDirectory:
  *                type: string
- *              file:
- *                type: string
- *                format: binary
- *                description: The source file to be uploaded (PDF, Word, image, etc.)
+ *              files:
+ *                type: array
+ *                items:
+ *                  type: string
+ *                  format: binary
+ *                  description: The source files to be uploaded (PDF, Word, image, etc.)
  *    responses:
  *      200:
  *        description: Success message.
@@ -47,7 +49,7 @@ router.get("/");
  *              properties:
  *                message:
  *                  type: string
- *                  example: File uploaded successfully.
+ *                  example: Files uploaded successfully.
  *      400:
  *        description: Invalid file upload request
  *        content:
@@ -57,7 +59,7 @@ router.get("/");
  *              properties:
  *                error:
  *                  type: string
- *                  example: No file uploaded or invalid file type.
+ *                  example: No files uploaded or invalid file types.
  *      500:
  *        description: Internal server error
  *        content:
@@ -69,7 +71,7 @@ router.get("/");
  *                  type: string
  *                  example: An error occurred during file upload.
  */
-router.post("/", uploadFile().single("file"), fileController.uploadFile);
+router.post("/", uploadFile().array("files"), fileController.uploadFile);
 
 /**
  * @openapi
