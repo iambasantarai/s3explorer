@@ -1,5 +1,7 @@
 import { Router } from "express";
 import directoryController from "../controllers/directory.controller";
+import { validateSchema } from "../middlewares/validation.milddleware";
+import directorySchema from "../schemas/directory.schema";
 
 const router = Router();
 
@@ -39,7 +41,11 @@ const router = Router();
  *      400:
  *        description: Bad request, invalid input
  */
-router.post("/", directoryController.createDirectory);
+router.post(
+  "/",
+  validateSchema(directorySchema.create),
+  directoryController.createDirectory,
+);
 
 /**
  * @openapi
@@ -80,7 +86,11 @@ router.post("/", directoryController.createDirectory);
  *      400:
  *        description: Bad request, invalid input
  */
-router.put("/", directoryController.updateDirectory);
+router.put(
+  "/",
+  validateSchema(directorySchema.update),
+  directoryController.updateDirectory,
+);
 
 /**
  * @openapi
@@ -118,6 +128,10 @@ router.put("/", directoryController.updateDirectory);
  *      400:
  *        description: Bad request, invalid input
  */
-router.delete("/", directoryController.deleteDirectory);
+router.delete(
+  "/",
+  validateSchema(directorySchema.remove),
+  directoryController.deleteDirectory,
+);
 
 export default router;
