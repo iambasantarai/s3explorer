@@ -72,7 +72,7 @@ const create = async (params: {
     if (!isValidDirectoryName(directoryName)) {
       throw new CustomError(
         StatusCodes.BAD_REQUEST,
-        "Directory name can only contain letters, numbers, underscore(_) and hyphens(-).",
+        "Directory name contains invalid characters.",
       );
     }
 
