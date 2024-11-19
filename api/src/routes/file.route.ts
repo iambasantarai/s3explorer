@@ -1,6 +1,8 @@
 import { Router } from "express";
 import fileController from "../controllers/file.controller";
 import uploadFile from "../middlewares/fileUpload.middleware";
+import { validateSchema } from "../middlewares/validation.milddleware";
+import fileSchema from "../schemas/file.schema";
 
 const router = Router();
 
@@ -71,7 +73,12 @@ router.get("/");
  *                  type: string
  *                  example: An error occurred during file upload.
  */
-router.post("/", uploadFile().array("files"), fileController.uploadFile);
+router.post(
+  "/",
+  uploadFile().array("files"),
+  validateSchema(fileSchema.upload),
+  fileController.uploadFile,
+);
 
 /**
  * @openapi
@@ -133,7 +140,7 @@ router.post("/", uploadFile().array("files"), fileController.uploadFile);
  *                  type: string
  *                  example: An error occurred during file update.
  */
-router.put("/", fileController.updateFile);
+router.put("/", validateSchema(fileSchema.rename), fileController.updateFile);
 
 /**
  * @openapi
@@ -188,6 +195,10 @@ router.put("/", fileController.updateFile);
  *                  type: string
  *                  example: An error occurred during file deletion.
  */
-router.delete("/", fileController.deleteFile);
+router.delete(
+  "/",
+  validateSchema(fileSchema.remove),
+  fileController.deleteFile,
+);
 
 export default router;

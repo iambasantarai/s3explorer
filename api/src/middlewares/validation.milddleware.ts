@@ -10,6 +10,7 @@ export const validateSchema =
         body: req.body,
         query: req.query,
         params: req.params,
+        files: req.files,
       });
 
       next();
