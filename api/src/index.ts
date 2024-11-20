@@ -35,3 +35,5 @@ app.use(errorHandlerMiddleware);
 app.listen(serverPort, () => {
   console.log(`[API]: Listening at http://localhost:${serverPort}`);
 });
+
+export default app;
