@@ -18,7 +18,8 @@
     "format:fix": "prettier --write \"./**/*.{js,jsx,ts,tsx,json,html,css}\"",
     "docker:build": "docker build -t s3explorer .",
     "docker:run": "docker run -d --name s3explorerV0 -p 8000:8000 -p 3000:3000 s3explorer:latest",
-    "docker:clean-run": "docker rm -f s3explorerV0 && docker run -d --name s3explorerV0 -p 8000:8000 -p 3000:3000 s3explorer:latest"
+    "docker:clean-run": "docker rm -f s3explorerV0 && docker run -d --name s3explorerV0 -p 8000:8000 -p 3000:3000 s3explorer:latest",
+    "test:api": "yarn workspace api test"
   },
   "dependencies": {},
   "devDependencies": {
