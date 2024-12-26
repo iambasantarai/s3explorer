@@ -1,16 +1,24 @@
 import { createReadStream } from "node:fs";
-import S3 from "aws-sdk/clients/s3";
+import {
+  CopyObjectCommand,
+  DeleteObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { awsCredentials } from "../utils/env.util";
 import { CustomError } from "../errors/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../utils/error.util";
 import fileOperationHelper from "../helper/fileOperation.helper";
 
-const createS3Client = (): S3 => {
-  return new S3({
-    accessKeyId: awsCredentials.accessKeyId,
-    secretAccessKey: awsCredentials.secretAccessKey,
-    region: awsCredentials.region,
+const createS3Client = (): S3Client => {
+  return new S3Client({
+    credentials: {
+      accessKeyId: awsCredentials.accessKeyId as string,
+      secretAccessKey: awsCredentials.secretAccessKey as string,
+    },
+    region: awsCredentials.region as string,
   });
 };
 
@@ -30,12 +38,13 @@ const upload = async (
 
         // Check if the file already exists
         try {
-          await s3
-            .headObject({
+          await s3.send(
+            new HeadObjectCommand({
               Bucket: awsCredentials.s3BucketName as string,
               Key: fileKey,
-            })
-            .promise();
+            }),
+          );
+
           throw new CustomError(
             StatusCodes.BAD_REQUEST,
             `A file with the name ${file.originalname} already exists in ${destinationDirectory}.`,
@@ -44,27 +53,30 @@ const upload = async (
           /* eslint-disable @typescript-eslint/no-explicit-any */
           error: any
         ) {
-          if (error.code !== "NotFound") {
+          if (
+            error.name !== "NotFound" &&
+            error.$metadata?.httpStatusCode !== 404
+          ) {
             throw error;
           }
         }
 
         const fileStream = createReadStream(file.path);
-        const uploadParams = {
+        const uploadParams = new PutObjectCommand({
           Bucket: awsCredentials.s3BucketName as string,
           ContentType: file.mimetype,
           Key: fileKey,
           Body: fileStream,
-        };
+        });
 
-        const data = await s3.upload(uploadParams).promise();
+        await s3.send(uploadParams);
 
         // Remove the local file after successful upload
         await fileOperationHelper.removeFile(file.path);
 
         return {
           message: `${file.originalname} has been uploaded successfully.`,
-          fileUrl: data.Location,
+          fileUrl: `https://${awsCredentials.s3BucketName}.s3.${awsCredentials.region}.amazonaws.com/${fileKey}`,
         };
       }),
     );
@@ -97,21 +109,22 @@ const update = async (
     }/${newFileName}`;
 
     // Check if the old file exists
-    await s3
-      .headObject({
-        Bucket: awsCredentials.s3BucketName as string,
+    await s3.send(
+      new HeadObjectCommand({
+        Bucket: awsCredentials.s3BucketName,
         Key: oldKey,
-      })
-      .promise();
+      }),
+    );
 
     // Ensure the new file name doesn't already exist
     try {
-      await s3
-        .headObject({
-          Bucket: awsCredentials.s3BucketName as string,
+      await s3.send(
+        new HeadObjectCommand({
+          Bucket: awsCredentials.s3BucketName,
           Key: newKey,
-        })
-        .promise();
+        }),
+      );
+
       throw new CustomError(
         StatusCodes.BAD_REQUEST,
         `A file with the name ${newFileName} already exists in ${destinationDirectory}.`,
@@ -120,27 +133,30 @@ const update = async (
       /* eslint-disable @typescript-eslint/no-explicit-any */
       error: any
     ) {
-      if (error.code !== "NotFound") {
+      if (
+        error.name !== "NotFound" &&
+        error.$metadata?.httpStatusCode !== 404
+      ) {
         throw error;
       }
     }
 
     // Rename the file by copying and deleting the old one
-    await s3
-      .copyObject({
+    await s3.send(
+      new CopyObjectCommand({
         Bucket: awsCredentials.s3BucketName as string,
         CopySource: `/${awsCredentials.s3BucketName}/${oldKey}`,
         Key: newKey,
-      })
-      .promise();
+      }),
+    );
 
     // After successful copy, delete the old file
-    await s3
-      .deleteObject({
+    await s3.send(
+      new DeleteObjectCommand({
         Bucket: awsCredentials.s3BucketName as string,
         Key: oldKey,
-      })
-      .promise();
+      }),
+    );
 
     return {
       message: `${oldFileName} has been renamed to ${newFileName} successfully.`,
@@ -151,13 +167,12 @@ const update = async (
   ) {
     console.error("ERROR:", error);
 
-    if (error.code === "NotFound") {
+    if (error.name === "NotFound" || error.$metadata?.httpStatusCode === 404) {
       throw new CustomError(
         StatusCodes.BAD_REQUEST,
         `The file ${oldFileName} was not found in ${destinationDirectory}.`,
       );
     }
-
     throw new CustomError(
       StatusCodes.INTERNAL_SERVER_ERROR,
       getErrorMessage(error),
@@ -165,6 +180,7 @@ const update = async (
   }
 };
 
+// TODO: it needs to be re-implemented
 const remove = async (filePaths: string[]) => {
   try {
     const s3 = createS3Client();
@@ -176,7 +192,7 @@ const remove = async (filePaths: string[]) => {
       };
 
       try {
-        await s3.deleteObject(deleteParams).promise();
+        await s3.send(new DeleteObjectCommand(deleteParams));
         return { filePath, status: "deleted" };
       } catch (error) {
         console.error(`Failed to delete ${filePath}:`, error);
