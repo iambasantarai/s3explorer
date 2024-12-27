@@ -24,10 +24,7 @@ const createS3Client = (): S3Client => {
   });
 };
 
-const upload = async (
-  destinationDirectory: string,
-  files: Express.Multer.File[],
-) => {
+const upload = async (directory: string, files: Express.Multer.File[]) => {
   try {
     const s3 = createS3Client();
 
@@ -35,7 +32,7 @@ const upload = async (
       /* eslint-disable @typescript-eslint/no-explicit-any */
       files.map(async (file: any) => {
         const fileKey = `${awsCredentials.basePrefix}${
-          destinationDirectory !== "/" ? `/${destinationDirectory}` : ""
+          directory !== "/" ? `/${directory}` : ""
         }/${file.originalname}`;
 
         // Check if the file already exists
@@ -49,7 +46,7 @@ const upload = async (
 
           throw new CustomError(
             StatusCodes.BAD_REQUEST,
-            `A file with the name ${file.originalname} already exists in ${destinationDirectory}.`,
+            `A file with the name ${file.originalname} already exists in ${directory}.`,
           );
         } catch (
           /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -95,7 +92,7 @@ const upload = async (
 };
 
 const update = async (
-  destinationDirectory: string,
+  directory: string,
   oldFileName: string,
   newFileName: string,
 ) => {
@@ -103,11 +100,11 @@ const update = async (
     const s3 = createS3Client();
 
     const oldKey = `${awsCredentials.basePrefix}${
-      destinationDirectory !== "/" ? `/${destinationDirectory}` : ""
+      directory !== "/" ? `/${directory}` : ""
     }/${oldFileName}`;
 
     const newKey = `${awsCredentials.basePrefix}${
-      destinationDirectory !== "/" ? `/${destinationDirectory}` : ""
+      directory !== "/" ? `/${directory}` : ""
     }/${newFileName}`;
 
     // Check if the old file exists
@@ -129,7 +126,7 @@ const update = async (
 
       throw new CustomError(
         StatusCodes.BAD_REQUEST,
-        `A file with the name ${newFileName} already exists in ${destinationDirectory}.`,
+        `A file with the name ${newFileName} already exists in ${directory}.`,
       );
     } catch (
       /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -172,7 +169,7 @@ const update = async (
     if (error.name === "NotFound" || error.$metadata?.httpStatusCode === 404) {
       throw new CustomError(
         StatusCodes.BAD_REQUEST,
-        `The file ${oldFileName} was not found in ${destinationDirectory}.`,
+        `The file ${oldFileName} was not found in ${directory}.`,
       );
     }
     throw new CustomError(

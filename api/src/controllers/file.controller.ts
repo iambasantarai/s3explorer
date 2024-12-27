@@ -6,13 +6,13 @@ import { StatusCodes } from "http-status-codes";
 const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { files } = req;
-    const { destinationDirectory } = req.body;
+    const { directory } = req.body;
 
     if (!Array.isArray(files) || files.length === 0) {
       throw new CustomError(StatusCodes.BAD_REQUEST, "No file provided.");
     }
 
-    const apiResponse = await fileService.upload(destinationDirectory, files);
+    const apiResponse = await fileService.upload(directory, files);
 
     return res.status(StatusCodes.OK).json(apiResponse);
   } catch (error) {
@@ -23,10 +23,10 @@ const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
 
 const updateFile = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { destinationDirectory, oldFileName, newFileName } = req.body;
+    const { directory, oldFileName, newFileName } = req.body;
 
     const apiResponse = await fileService.update(
-      destinationDirectory,
+      directory,
       oldFileName,
       newFileName,
     );

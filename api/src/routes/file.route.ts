@@ -33,7 +33,7 @@ router.get("/");
  *          schema:
  *            type: object
  *            properties:
- *              destinationDirectory:
+ *              directory:
  *                type: string
  *              files:
  *                type: array
@@ -95,7 +95,7 @@ router.post(
  *          schema:
  *            type: object
  *            properties:
- *              destinationDirectory:
+ *              directory:
  *                type: string
  *                description: The directory where the file is located.
  *              oldFileName:
@@ -105,7 +105,7 @@ router.post(
  *                type: string
  *                description: The new name for the file.
  *            required:
- *              - destinationDirectory
+ *              - directory
  *              - oldFileName
  *              - newFileName
  *    responses:
