@@ -1,30 +1,45 @@
-import S3, { HeadObjectRequest, PutObjectRequest } from "aws-sdk/clients/s3";
+import {
+  CopyObjectCommand,
+  DeleteObjectCommand,
+  HeadObjectCommand,
+  ListObjectsV2Command,
+  ListObjectsV2CommandOutput,
+  PutObjectCommand,
+  S3Client,
+  _Object as S3Object,
+} from "@aws-sdk/client-s3";
 import { CustomError } from "../errors/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../utils/error.util";
 import { awsCredentials } from "../utils/env.util";
 import { isValidDirectoryName } from "../helper/validation.helper";
 
-const createS3Client = (): S3 => {
-  return new S3({
-    accessKeyId: awsCredentials.accessKeyId,
-    secretAccessKey: awsCredentials.secretAccessKey,
-    region: awsCredentials.region,
+const createS3Client = (): S3Client => {
+  return new S3Client({
+    credentials: {
+      accessKeyId: awsCredentials.accessKeyId as string,
+      secretAccessKey: awsCredentials.secretAccessKey as string,
+    },
+    region: awsCredentials.region as string,
   });
 };
 
 const checkIfExists = async (key: string): Promise<boolean> => {
   try {
     const s3 = createS3Client();
-    const params: HeadObjectRequest = {
-      Bucket: awsCredentials.s3BucketName as string,
-      Key: key,
-    };
+    const alreadyExists = await s3.send(
+      new HeadObjectCommand({
+        Bucket: awsCredentials.s3BucketName as string,
+        Key: key,
+      }),
+    );
 
-    const alreadyExists = await s3.headObject(params).promise();
     return !!alreadyExists;
-  } catch (error: any) {
-    if (error.code === "NotFound") {
+  } catch (
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    error: any
+  ) {
+    if (error.name === "NotFound" || error.$metadata?.httpStatusCode === 404) {
       return false;
     }
 
@@ -38,28 +53,36 @@ const checkIfExists = async (key: string): Promise<boolean> => {
 
 const listFromCurrentPath = async (
   directoryPath: string,
-): Promise<S3.Object[]> => {
-  const s3 = createS3Client();
-  const bucketName = awsCredentials.s3BucketName;
+): Promise<S3Object[]> => {
+  try {
+    const s3 = createS3Client();
 
-  const objects: S3.Object[] = [];
-  let continuationToken: string | undefined = undefined;
+    const objects: S3Object[] = [];
+    let continuationToken: string | undefined = undefined;
 
-  do {
-    const data: any = await s3
-      .listObjectsV2({
-        Bucket: bucketName as string,
+    do {
+      const listCommand = new ListObjectsV2Command({
+        Bucket: awsCredentials.s3BucketName,
         Prefix: directoryPath,
         ContinuationToken: continuationToken,
-      })
-      .promise();
+      });
 
-    objects.push(...(data.Contents || []));
+      const data: ListObjectsV2CommandOutput = await s3.send(listCommand);
 
-    continuationToken = data.NextContinuationToken;
-  } while (continuationToken);
+      objects.push(...(data.Contents || []));
 
-  return objects;
+      continuationToken = data.NextContinuationToken;
+    } while (continuationToken);
+
+    return objects;
+  } catch (error: any) {
+    console.error("ERROR: ", error);
+
+    throw new CustomError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      getErrorMessage(error),
+    );
+  }
 };
 
 const create = async (params: {
@@ -77,14 +100,11 @@ const create = async (params: {
     }
 
     const s3 = createS3Client();
-    const bucketName = awsCredentials.s3BucketName;
     const basePrefix = awsCredentials.basePrefix;
 
-    const directoryKey = `${basePrefix ? basePrefix + "/" : ""}${
-      currentPath !== "/" ? currentPath + "/" : ""
+    const directoryKey = `${basePrefix ? `${basePrefix}/` : ""}${
+      currentPath !== "/" ? `${currentPath}/` : ""
     }${directoryName}/`;
-
-    // TODO: Should check for existance of destniation
 
     const directoryExists = await checkIfExists(directoryKey);
     if (directoryExists) {
@@ -94,16 +114,15 @@ const create = async (params: {
       );
     }
 
-    // Create the "directory" with an empty body and content length set to 0
-    const bucketParams: PutObjectRequest = {
-      Bucket: bucketName as string,
+    // It might create a file with no name and of size 0
+    const putCommand = new PutObjectCommand({
+      Bucket: awsCredentials.s3BucketName as string,
       Key: directoryKey,
       Body: "",
       ContentLength: 0,
-    };
+    });
 
-    // It might create a file with no name and of size 0
-    await s3.putObject(bucketParams).promise();
+    await s3.send(putCommand);
 
     return {
       message: `Directory ${directoryName} has been created successfully.`,
@@ -133,7 +152,6 @@ const remove = async (params: {
     }
 
     const s3 = createS3Client();
-    const bucketName = awsCredentials.s3BucketName;
     const basePrefix = awsCredentials.basePrefix;
 
     const directoryPath = `${basePrefix}/${
@@ -151,22 +169,24 @@ const remove = async (params: {
     const objects = await listFromCurrentPath(directoryPath);
 
     // Delete each object (file or directory) individually
-    for (const object of objects) {
-      await s3
-        .deleteObject({
-          Bucket: bucketName as string,
-          Key: object.Key!,
-        })
-        .promise();
-    }
+    const deletePromises = objects.map((object) => {
+      if (!object.Key) return Promise.resolve();
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: awsCredentials.s3BucketName as string,
+        Key: object.Key,
+      });
+
+      return s3.send(deleteCommand);
+    });
+
+    await Promise.all(deletePromises);
 
     // Delete the directory itself
-    await s3
-      .deleteObject({
-        Bucket: bucketName as string,
-        Key: directoryPath,
-      })
-      .promise();
+    const deleteDirectoryCommand = new DeleteObjectCommand({
+      Bucket: awsCredentials.s3BucketName as string,
+      Key: directoryPath,
+    });
+    await s3.send(deleteDirectoryCommand);
 
     return {
       message: `${directoryName} directory has been deleted successfully.`,
@@ -234,29 +254,37 @@ const update = async (params: {
 
     // Move files from old directory to new directory
     const oldDirectoryContents = await listFromCurrentPath(oldDirectoryPath);
-    await Promise.all(
-      oldDirectoryContents.map(async (object: any) => {
-        const copyParams = {
-          Bucket: bucketName as string,
-          CopySource: encodeURIComponent(`${bucketName}/${object.Key}`),
-          Key: object.Key!.replace(oldDirectoryPath, newDirectoryPath),
-        };
 
-        await s3.copyObject(copyParams).promise();
-      }),
-    );
+    const copyPromises = oldDirectoryContents.map((object) => {
+      if (!object.Key) return Promise.resolve();
+      const newKey = object.Key.replace(oldDirectoryPath, newDirectoryPath);
+      const copyCommand = new CopyObjectCommand({
+        Bucket: awsCredentials.s3BucketName as string,
+        CopySource: `${awsCredentials.s3BucketName}/${encodeURIComponent(object.Key)}`,
+        Key: newKey,
+      });
+      return s3.send(copyCommand);
+    });
+
+    await Promise.all(copyPromises);
 
     // Delete old directory objects
-    await Promise.all(
-      oldDirectoryContents.map(async (object: any) => {
-        await s3
-          .deleteObject({
-            Bucket: bucketName as string,
-            Key: object.Key!,
-          })
-          .promise();
-      }),
-    );
+    const deletePromises = oldDirectoryContents.map((object) => {
+      if (!object.Key) return Promise.resolve();
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: awsCredentials.s3BucketName as string,
+        Key: object.Key,
+      });
+      return s3.send(deleteCommand);
+    });
+
+    await Promise.all(deletePromises);
+
+    const deleteOldDirectoryCommand = new DeleteObjectCommand({
+      Bucket: awsCredentials.s3BucketName as string,
+      Key: oldDirectoryPath,
+    });
+    await s3.send(deleteOldDirectoryCommand);
 
     return {
       message: `${oldDirectoryName} has been updated to ${newDirectoryName} successfully.`,
