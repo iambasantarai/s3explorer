@@ -24,7 +24,7 @@ const createS3Client = (): S3Client => {
   });
 };
 
-const checkIfExists = async (key: string): Promise<boolean> => {
+export const checkIfExists = async (key: string): Promise<boolean> => {
   try {
     const s3 = createS3Client();
     const alreadyExists = await s3.send(

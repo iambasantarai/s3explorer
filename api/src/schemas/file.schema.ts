@@ -32,7 +32,13 @@ const rename = z.object({
 
 const remove = z.object({
   body: z.object({
-    filePaths: z.array(z.any()),
+    directory: z
+      .string({
+        required_error: "Destination directory is required.",
+      })
+      .min(1, "Destination directory must contain at least 1 character.")
+      .max(255, "Destination directory cannot exceed 255 characters."),
+    files: z.array(z.any()),
   }),
 });
 

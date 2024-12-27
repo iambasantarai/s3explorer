@@ -157,12 +157,16 @@ router.put("/", validateSchema(fileSchema.rename), fileController.updateFile);
  *          schema:
  *            type: object
  *            properties:
- *              filePaths:
+ *              directory:
+ *                type: string
+ *                description: The directory where the file is located.
+ *              files:
  *                type: array
  *                items:
  *                  type: string
  *            required:
- *              - filePaths
+ *              - destination
+ *              - files
  *    responses:
  *      200:
  *        description: Success message.

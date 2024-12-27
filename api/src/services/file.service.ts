@@ -11,6 +11,8 @@ import { CustomError } from "../errors/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../utils/error.util";
 import fileOperationHelper from "../helper/fileOperation.helper";
+import { isValidDirectoryName } from "../helper/validation.helper";
+import { checkIfExists } from "./directory.service";
 
 const createS3Client = (): S3Client => {
   return new S3Client({
@@ -180,23 +182,39 @@ const update = async (
   }
 };
 
-// TODO: it needs to be re-implemented
-const remove = async (filePaths: string[]) => {
+const remove = async (directory: string, files: string[]) => {
   try {
+    if (!isValidDirectoryName(directory)) {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        "Destination directory name contains invalid characters.",
+      );
+    }
+
     const s3 = createS3Client();
 
-    const deletePromises = filePaths.map(async (filePath) => {
+    const directoryKey: string = `${awsCredentials.basePrefix}/${directory}/`;
+    const directoryExists = await checkIfExists(directoryKey);
+    if (!directoryExists) {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        `Destination directory ${directory} does not exist.`,
+      );
+    }
+
+    const deletePromises = files.map(async (file) => {
       const deleteParams = {
         Bucket: awsCredentials.s3BucketName as string,
-        Key: `${awsCredentials.basePrefix}/${filePath}`,
+        Key: `${awsCredentials.basePrefix}/${directory ? directory + "/" : ""}${file}`,
       };
 
       try {
         await s3.send(new DeleteObjectCommand(deleteParams));
-        return { filePath, status: "deleted" };
+
+        return { file, status: "deleted" };
       } catch (error) {
-        console.error(`Failed to delete ${filePath}:`, error);
-        return { filePath, status: "failed", error: getErrorMessage(error) };
+        console.error(`Failed to delete ${file}:`, error);
+        return { file, status: "failed", error: getErrorMessage(error) };
       }
     });
 

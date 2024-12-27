@@ -40,13 +40,13 @@ const updateFile = async (req: Request, res: Response, next: NextFunction) => {
 
 const deleteFile = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { filePaths } = req.body;
+    const { directory, files } = req.body;
 
-    if (!Array.isArray(filePaths) || filePaths.length === 0) {
+    if (!Array.isArray(files) || files.length === 0) {
       throw new CustomError(StatusCodes.BAD_REQUEST, "No file paths provided.");
     }
 
-    const apiResponse = await fileService.remove(filePaths);
+    const apiResponse = await fileService.remove(directory, files);
 
     return res.status(StatusCodes.OK).json(apiResponse);
   } catch (error) {
