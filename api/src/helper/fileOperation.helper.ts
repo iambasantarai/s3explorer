@@ -1,6 +1,6 @@
 import fs from "node:fs";
 
-const removeFile = (path: string) => {
+function removeFile(path: string) {
   return new Promise((resolve, reject) => {
     fs.unlink(path, (error) => {
       if (error) {
@@ -12,7 +12,7 @@ const removeFile = (path: string) => {
       resolve(true);
     });
   });
-};
+}
 
 export default {
   removeFile,

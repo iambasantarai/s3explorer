@@ -1,6 +1,6 @@
 import express, { Express, NextFunction, Request, Response } from "express";
 import routes from "./routes";
-import { generateSwaggerDocs } from "./configs/swagger.config";
+import generateSwaggerDocs from "./configs/swagger.config";
 import path from "path";
 import morgan from "morgan";
 

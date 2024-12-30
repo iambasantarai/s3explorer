@@ -12,9 +12,9 @@ import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../utils/error.util";
 import fileOperationHelper from "../helper/fileOperation.helper";
 import { isValidDirectoryName } from "../helper/validation.helper";
-import { checkIfExists } from "./directory.service";
+import directoryService from "./directory.service";
 
-const createS3Client = (): S3Client => {
+function createS3Client(): S3Client {
   return new S3Client({
     credentials: {
       accessKeyId: awsCredentials.accessKeyId as string,
@@ -22,9 +22,9 @@ const createS3Client = (): S3Client => {
     },
     region: awsCredentials.region as string,
   });
-};
+}
 
-const upload = async (directory: string, files: Express.Multer.File[]) => {
+async function upload(directory: string, files: Express.Multer.File[]) {
   try {
     const s3 = createS3Client();
 
@@ -89,13 +89,13 @@ const upload = async (directory: string, files: Express.Multer.File[]) => {
       getErrorMessage(error),
     );
   }
-};
+}
 
-const update = async (
+async function update(
   directory: string,
   oldFileName: string,
   newFileName: string,
-) => {
+) {
   try {
     const s3 = createS3Client();
 
@@ -177,9 +177,9 @@ const update = async (
       getErrorMessage(error),
     );
   }
-};
+}
 
-const remove = async (directory: string, files: string[]) => {
+async function remove(directory: string, files: string[]) {
   try {
     if (!isValidDirectoryName(directory)) {
       throw new CustomError(
@@ -191,7 +191,7 @@ const remove = async (directory: string, files: string[]) => {
     const s3 = createS3Client();
 
     const directoryKey: string = `${awsCredentials.basePrefix}/${directory}/`;
-    const directoryExists = await checkIfExists(directoryKey);
+    const directoryExists = await directoryService.checkIfExists(directoryKey);
     if (!directoryExists) {
       throw new CustomError(
         StatusCodes.BAD_REQUEST,
@@ -232,7 +232,7 @@ const remove = async (directory: string, files: string[]) => {
       getErrorMessage(error),
     );
   }
-};
+}
 
 export default {
   upload,

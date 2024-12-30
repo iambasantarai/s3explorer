@@ -16,7 +16,7 @@ const options = {
 
 const openAPISpecification = swaggerJsdoc(options);
 
-export const generateSwaggerDocs = async (app: Application) => {
+async function generateSwaggerDocs(app: Application) {
   app.use(
     "/api/docs/explorer",
     swaggerUI.serve,
@@ -27,4 +27,6 @@ export const generateSwaggerDocs = async (app: Application) => {
     res.setHeader("Content-type", "application/json");
     res.send(openAPISpecification);
   });
-};
+}
+
+export default generateSwaggerDocs;

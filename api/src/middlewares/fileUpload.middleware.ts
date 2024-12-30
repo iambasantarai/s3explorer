@@ -9,7 +9,7 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-const createStorage = (): StorageEngine => {
+function createStorage(): StorageEngine {
   return multer.diskStorage({
     destination: function (req: Request, file: Express.Multer.File, cb) {
       // Organize uploads by date
@@ -25,9 +25,9 @@ const createStorage = (): StorageEngine => {
       cb(null, file.originalname);
     },
   });
-};
+}
 
-const createFileFilter = () => {
+function createFileFilter() {
   //TODO: you can make them configurable through environment variables or a config file
   const allowedMimeTypes = [
     "application/pdf",
@@ -52,9 +52,9 @@ const createFileFilter = () => {
       cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE", file.originalname));
     }
   };
-};
+}
 
-const uploadFile = () => {
+function uploadFile() {
   return multer({
     storage: createStorage(),
     fileFilter: createFileFilter(),
@@ -62,6 +62,6 @@ const uploadFile = () => {
       fileSize: fileUploadConfig.maxFileSize || 5 * 1024 * 1024, // Max file size (default: 5MB)
     },
   });
-};
+}
 
 export default uploadFile;

@@ -138,7 +138,7 @@ const mimeTypesMap = new Map<string, MimeType>([
   [".vcf", { type: "text/x-vcard", name: "vCard File" }],
 ]);
 
-export const getMimeType = (filename: string): MimeType => {
+export function getMimeType(filename: string): MimeType {
   const extension = filename.substring(filename.lastIndexOf(".")).toLowerCase();
   return mimeTypesMap.get(extension) ?? defaultMimeType;
-};
+}

@@ -14,7 +14,7 @@ import { getErrorMessage } from "../utils/error.util";
 import { awsCredentials } from "../utils/env.util";
 import { isValidDirectoryName } from "../helper/validation.helper";
 
-const createS3Client = (): S3Client => {
+function createS3Client(): S3Client {
   return new S3Client({
     credentials: {
       accessKeyId: awsCredentials.accessKeyId as string,
@@ -22,9 +22,9 @@ const createS3Client = (): S3Client => {
     },
     region: awsCredentials.region as string,
   });
-};
+}
 
-export const checkIfExists = async (key: string): Promise<boolean> => {
+async function checkIfExists(key: string): Promise<boolean> {
   try {
     const s3 = createS3Client();
     const alreadyExists = await s3.send(
@@ -49,11 +49,9 @@ export const checkIfExists = async (key: string): Promise<boolean> => {
       getErrorMessage(error),
     );
   }
-};
+}
 
-const listFromCurrentPath = async (
-  directoryPath: string,
-): Promise<S3Object[]> => {
+async function listFromCurrentPath(directoryPath: string): Promise<S3Object[]> {
   try {
     const s3 = createS3Client();
 
@@ -83,12 +81,9 @@ const listFromCurrentPath = async (
       getErrorMessage(error),
     );
   }
-};
+}
 
-const create = async (params: {
-  currentPath: string;
-  directoryName: string;
-}) => {
+async function create(params: { currentPath: string; directoryName: string }) {
   try {
     const { currentPath, directoryName } = params;
 
@@ -135,12 +130,9 @@ const create = async (params: {
       getErrorMessage(error),
     );
   }
-};
+}
 
-const remove = async (params: {
-  currentPath: string;
-  directoryName: string;
-}) => {
+async function remove(params: { currentPath: string; directoryName: string }) {
   try {
     const { currentPath, directoryName } = params;
 
@@ -199,13 +191,13 @@ const remove = async (params: {
       getErrorMessage(error),
     );
   }
-};
+}
 
-const update = async (params: {
+async function update(params: {
   currentPath: string;
   oldDirectoryName: string;
   newDirectoryName: string;
-}) => {
+}) {
   try {
     const { currentPath, oldDirectoryName, newDirectoryName } = params;
 
@@ -224,7 +216,6 @@ const update = async (params: {
     }
 
     const s3 = createS3Client();
-    const bucketName = awsCredentials.s3BucketName;
     const basePrefix = awsCredentials.basePrefix;
 
     // TODO: More clarity needed
@@ -297,9 +288,10 @@ const update = async (params: {
       getErrorMessage(error),
     );
   }
-};
+}
 
 export default {
+  checkIfExists,
   create,
   remove,
   update,

@@ -3,7 +3,7 @@ import explorerService from "../services/explorer.service";
 import { StatusCodes } from "http-status-codes";
 import logger from "../utils/log.util";
 
-const listAll = async (req: Request, res: Response, next: NextFunction) => {
+async function listAll(req: Request, res: Response, next: NextFunction) {
   try {
     const nextRootDirectory = req.query.nextRootDirectory as string;
     const continuationToken = req.query.continuationToken as string | undefined;
@@ -21,7 +21,7 @@ const listAll = async (req: Request, res: Response, next: NextFunction) => {
 
     next(error);
   }
-};
+}
 
 export default {
   listAll,

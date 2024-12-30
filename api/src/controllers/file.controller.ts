@@ -4,7 +4,7 @@ import { CustomError } from "../errors/custom.error";
 import { StatusCodes } from "http-status-codes";
 import logger from "../utils/log.util";
 
-const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
+async function uploadFile(req: Request, res: Response, next: NextFunction) {
   try {
     const { files } = req;
     const { directory } = req.body;
@@ -21,9 +21,9 @@ const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
 
     next(error);
   }
-};
+}
 
-const updateFile = async (req: Request, res: Response, next: NextFunction) => {
+async function updateFile(req: Request, res: Response, next: NextFunction) {
   try {
     const { directory, oldFileName, newFileName } = req.body;
 
@@ -39,9 +39,9 @@ const updateFile = async (req: Request, res: Response, next: NextFunction) => {
 
     next(error);
   }
-};
+}
 
-const deleteFile = async (req: Request, res: Response, next: NextFunction) => {
+async function deleteFile(req: Request, res: Response, next: NextFunction) {
   try {
     const { directory, files } = req.body;
 
@@ -57,7 +57,7 @@ const deleteFile = async (req: Request, res: Response, next: NextFunction) => {
 
     next(error);
   }
-};
+}
 
 export default {
   uploadFile,

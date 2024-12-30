@@ -39,9 +39,9 @@ interface ListAllObjectsResult {
   isTruncated: boolean;
 }
 
-const listAllObjects = async (
+async function listAllObjects(
   params: ListAllObjectsParams,
-): Promise<ListAllObjectsResult> => {
+): Promise<ListAllObjectsResult> {
   try {
     const { nextRootDirectory, continuationToken, maxKeys } = params;
 
@@ -141,7 +141,7 @@ const listAllObjects = async (
       getErrorMessage(error),
     );
   }
-};
+}
 
 export default {
   listAllObjects,

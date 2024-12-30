@@ -3,11 +3,11 @@ import { StatusCodes } from "http-status-codes";
 import directoryService from "../services/directory.service";
 import logger from "../utils/log.util";
 
-const createDirectory = async (
+async function createDirectory(
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+) {
   try {
     const { currentPath, directoryName } = req.body;
 
@@ -22,13 +22,13 @@ const createDirectory = async (
 
     next(error);
   }
-};
+}
 
-const deleteDirectory = async (
+async function deleteDirectory(
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+) {
   try {
     const { currentPath, directoryName } = req.body;
 
@@ -43,13 +43,13 @@ const deleteDirectory = async (
 
     next(error);
   }
-};
+}
 
-const updateDirectory = async (
+async function updateDirectory(
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+) {
   try {
     const { currentPath, oldDirectoryName, newDirectoryName } = req.body;
 
@@ -65,7 +65,7 @@ const updateDirectory = async (
 
     next(error);
   }
-};
+}
 
 export default {
   createDirectory,
