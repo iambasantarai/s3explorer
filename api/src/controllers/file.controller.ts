@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import fileService from "../services/file.service";
 import { CustomError } from "../errors/custom.error";
 import { StatusCodes } from "http-status-codes";
+import logger from "../utils/log.util";
 
 const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -16,7 +17,8 @@ const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
 
     return res.status(StatusCodes.OK).json(apiResponse);
   } catch (error) {
-    console.error("ERROR:", error);
+    logger.error("ERROR: ", error);
+
     next(error);
   }
 };
@@ -33,7 +35,8 @@ const updateFile = async (req: Request, res: Response, next: NextFunction) => {
 
     return res.status(StatusCodes.OK).json(apiResponse);
   } catch (error) {
-    console.error("ERROR:", error);
+    logger.error("ERROR: ", error);
+
     next(error);
   }
 };
@@ -50,7 +53,8 @@ const deleteFile = async (req: Request, res: Response, next: NextFunction) => {
 
     return res.status(StatusCodes.OK).json(apiResponse);
   } catch (error) {
-    console.error("ERROR:", error);
+    logger.error("ERROR: ", error);
+
     next(error);
   }
 };

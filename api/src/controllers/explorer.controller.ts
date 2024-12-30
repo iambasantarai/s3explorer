@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import explorerService from "../services/explorer.service";
 import { StatusCodes } from "http-status-codes";
+import logger from "../utils/log.util";
 
 const listAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -16,7 +17,8 @@ const listAll = async (req: Request, res: Response, next: NextFunction) => {
 
     return res.status(StatusCodes.OK).json(apiResponse);
   } catch (error) {
-    console.log("ERROR: ", error);
+    logger.error("ERROR: ", error);
+
     next(error);
   }
 };

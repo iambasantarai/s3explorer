@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import directoryService from "../services/directory.service";
+import logger from "../utils/log.util";
 
 const createDirectory = async (
   req: Request,
@@ -17,7 +18,8 @@ const createDirectory = async (
 
     return res.status(StatusCodes.CREATED).json(apiResponse);
   } catch (error) {
-    console.log("ERROR: ", error);
+    logger.error("ERROR: ", error);
+
     next(error);
   }
 };
@@ -37,7 +39,8 @@ const deleteDirectory = async (
 
     return res.status(StatusCodes.OK).json(apiResponse);
   } catch (error) {
-    console.log("ERROR: ", error);
+    logger.error("ERROR: ", error);
+
     next(error);
   }
 };
@@ -58,7 +61,8 @@ const updateDirectory = async (
 
     return res.status(StatusCodes.OK).json(apiResponse);
   } catch (error) {
-    console.log("ERROR: ", error);
+    logger.error("ERROR: ", error);
+
     next(error);
   }
 };
