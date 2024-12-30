@@ -1,9 +1,15 @@
 import path from "node:path";
+import fs from "node:fs";
 import { createLogger, transports, format } from "winston";
 import { loggingConfig } from "./env.util";
 const { combine, timestamp, printf, errors } = format;
 
 const logDir = loggingConfig.dir;
+
+// Create the log directory if it doesn't exist
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir);
+}
 
 const logger = createLogger({
   format: combine(
