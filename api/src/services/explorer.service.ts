@@ -9,35 +9,13 @@ import { CustomError } from "../errors/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../utils/error.util";
 import { awsCredentials } from "../utils/env.util";
-import { getMimeType, MimeType } from "../utils/mimeType.util";
-
-interface ListAllObjectsParams {
-  nextRootDirectory: string;
-  continuationToken?: string;
-  maxKeys?: string;
-}
-
-interface FileObject {
-  basename: string;
-  type: "file";
-  path: string;
-  modifiedAt: number | null;
-  size: number;
-  mimeType: MimeType;
-}
-
-interface DirectoryObject {
-  basename: string;
-  type: "directory";
-  path: string;
-}
-
-interface ListAllObjectsResult {
-  data: (DirectoryObject | FileObject)[];
-  currentPath: string;
-  continuationToken?: string;
-  isTruncated: boolean;
-}
+import { getMimeType } from "../utils/mimeType.util";
+import {
+  ListAllObjectsParams,
+  FileObject,
+  DirectoryObject,
+  ListAllObjectsResult,
+} from "../types";
 
 async function listAllObjects(
   params: ListAllObjectsParams,

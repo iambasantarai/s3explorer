@@ -1,7 +1,4 @@
-export interface MimeType {
-  type: string;
-  name: string;
-}
+import { MimeType } from "../types";
 
 const defaultMimeType: MimeType = {
   type: "binary/octet-stream",
