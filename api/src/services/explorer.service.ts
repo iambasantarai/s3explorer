@@ -106,7 +106,7 @@ async function listAllObjects(
       nextRootDirectory && nextRootDirectory !== "/" ? nextRootDirectory : "/";
 
     return {
-      data: [...directories, ...filteredFiles],
+      objects: [...directories, ...filteredFiles],
       currentPath: currentDirectoryPath,
       continuationToken: data.NextContinuationToken,
       isTruncated: data.IsTruncated ?? false,

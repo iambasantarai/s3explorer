@@ -13,6 +13,7 @@ import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../utils/error.util";
 import { awsCredentials } from "../utils/env.util";
 import { isValidDirectoryName } from "../helper/validation.helper";
+import { CreateDirParams, RemoveDirParams, UpdateDirParams } from "../types";
 
 function createS3Client(): S3Client {
   return new S3Client({
@@ -83,7 +84,7 @@ async function listFromCurrentPath(directoryPath: string): Promise<S3Object[]> {
   }
 }
 
-async function create(params: { currentPath: string; directoryName: string }) {
+async function create(params: CreateDirParams): Promise<{ message: string }> {
   try {
     const { currentPath, directoryName } = params;
 
@@ -132,7 +133,7 @@ async function create(params: { currentPath: string; directoryName: string }) {
   }
 }
 
-async function remove(params: { currentPath: string; directoryName: string }) {
+async function remove(params: RemoveDirParams): Promise<{ message: string }> {
   try {
     const { currentPath, directoryName } = params;
 
@@ -193,11 +194,7 @@ async function remove(params: { currentPath: string; directoryName: string }) {
   }
 }
 
-async function update(params: {
-  currentPath: string;
-  oldDirectoryName: string;
-  newDirectoryName: string;
-}) {
+async function update(params: UpdateDirParams): Promise<{ message: string }> {
   try {
     const { currentPath, oldDirectoryName, newDirectoryName } = params;
 

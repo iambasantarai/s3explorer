@@ -25,8 +25,24 @@ export type DirectoryObject = {
 };
 
 export type ListAllObjectsResult = {
-  data: (DirectoryObject | FileObject)[];
+  objects: (DirectoryObject | FileObject)[];
   currentPath: string;
   continuationToken?: string;
   isTruncated: boolean;
+};
+
+export type CreateDirParams = {
+  currentPath: string;
+  directoryName: string;
+};
+
+export type RemoveDirParams = {
+  currentPath: string;
+  directoryName: string;
+};
+
+export type UpdateDirParams = {
+  currentPath: string;
+  oldDirectoryName: string;
+  newDirectoryName: string;
 };
